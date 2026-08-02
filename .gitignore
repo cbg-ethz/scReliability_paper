@@ -1,0 +1,48 @@
+# ── Raw inputs ───────────────────────────────────────────────────────
+# Not tracked. See data/README.md for what to download and where to put it
+# (perturbation h5ads from scPerturBench; source data from Ahlmann-Eltze et al.).
+/data/*
+!/data/README.md
+
+# ── Generated outputs ────────────────────────────────────────────────
+# Rebuilt by run_all.sh; archived separately for reproducibility.
+/intermediate/
+/output/
+/results/
+/figures/
+
+# The train/test splits are inputs, not outputs: they define the published
+# experiment and are tracked so results are reproducible exactly.
+!/results/
+/results/*
+!/results/retraining_quality_filtering/
+/results/retraining_quality_filtering/*
+!/results/retraining_quality_filtering/splits/
+
+/manuscript_edits/
+
+# ── Python ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# ── OS / editors ─────────────────────────────────────────────────────
+.DS_Store
+.vscode/
+.idea/
+
+# Local edit backups — never part of a release.
+*.bak
+*.orig
+*~
+*.tmp
+
+# ── LaTeX build artifacts ────────────────────────────────────────────
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.out
