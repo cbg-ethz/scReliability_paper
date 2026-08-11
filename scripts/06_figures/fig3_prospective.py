@@ -245,9 +245,7 @@ def panel_f_accuracy(ax):
             continue
         r = np.corrcoef(np.log10(sub["tau_full"]),
                         np.log10(sub["tau_pilot"]))[0, 1]
-        ns = sub[(sub["nstar_full"] > 0) & (sub["nstar_full"] < 1e6) &
-                 (sub["nstar_pilot"] > 0) & (sub["nstar_pilot"] < 1e6)]
-        fold = ns["nstar_pilot"] / ns["nstar_full"]
+        fold = sub["nstar_pilot"] / sub["nstar_full"]
         w2x = (100 * ((fold >= 0.5) & (fold <= 2)).mean()
                if len(fold) > 0 else 0)
         stats.append({"pilot_N": pN, "tau_r": r, "within_2x": w2x,
@@ -311,8 +309,8 @@ def panel_g_scatter(ax):
     pilot_N = 28
     sub = pilot_ext[
         (pilot_ext["pilot_N"] == pilot_N) &
-        (pilot_ext["nstar_full"] > 0) & (pilot_ext["nstar_full"] < 1e6) &
-        (pilot_ext["nstar_pilot"] > 0) & (pilot_ext["nstar_pilot"] < 1e6)
+        (pilot_ext["tau_full"] > 0) &
+        (pilot_ext["tau_pilot"] > 0)
     ].copy()
 
     log_f = np.log10(sub["nstar_full"].values)

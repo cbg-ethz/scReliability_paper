@@ -184,7 +184,6 @@ def panel_b_top_change(ax):
 
 
 # ════════════ Panel c — 1×4 slope plots ═══════════════════════════════
-SKIP_PANEL_B = {'baseControl', 'no_change', 'scFoundation'}
 CLASSES = ['Specific', 'Shared', 'Unreliable']
 CLASS_LABELS = ['Specific', 'Shared', 'Unreliable']
 COL_HERO = '#1e8449'
@@ -212,18 +211,18 @@ _PANEL_C_SPEC = {
 
 
 def _panel_c_highlights(label, df, val_col):
-    """Return (baseline, top-on-specific) for one panel-c benchmark."""
+    """Return (baseline, top-on-specific, methods to skip) for one panel-c benchmark."""
     baseline, skip = _PANEL_C_SPEC[label]
     exc = ds_weighted_excess(df, val_col, baseline, 'perturbation', skip, 'Specific')
     hero = max(exc, key=exc.get) if exc else None
-    return baseline, hero
+    return baseline, hero, skip
 
 
 HIGHLIGHTS = {label: _panel_c_highlights(label, df, val_col)
               for label, df, val_col, _ in PANEL_B_DATA}
 
 
-def panel_c_slope(ax, df, val_col, title, ylabel, baseline, hero,
+def panel_c_slope(ax, df, val_col, title, ylabel, baseline, hero, skip,
                   show_ylabel=True, show_legend=True):
     # Dataset-weighted mean, matching panels a and b: average within a dataset, then across datasets.
     # Wei et al. likewise report means. A pooled statistic would let the two large Replogle screens set
@@ -238,7 +237,7 @@ def panel_c_slope(ax, df, val_col, title, ylabel, baseline, hero,
 
     x = np.arange(3)
     for method, row in piv.iterrows():
-        if method in SKIP_PANEL_B or method in (baseline, hero):
+        if method in skip or method in (baseline, hero):
             continue
         v = row.values
         if np.any(np.isnan(v)):
@@ -401,10 +400,10 @@ ax_c = [fig.add_subplot(c_grid[0, 0])]
 for j in range(1, 4):
     ax_c.append(fig.add_subplot(c_grid[0, j], sharey=ax_c[0]))
 for k, (ax, (label, df, val, metric)) in enumerate(zip(ax_c, PANEL_B_DATA)):
-    bl, hero = HIGHLIGHTS[label]
+    bl, hero, skip = HIGHLIGHTS[label]
     show_legend = (k == 3)
     show_ylabel = (k == 0)
-    panel_c_slope(ax, df, val, label, metric, bl, hero,
+    panel_c_slope(ax, df, val, label, metric, bl, hero, skip,
                   show_ylabel=show_ylabel, show_legend=show_legend)
     if k > 0:
         ax.spines['left'].set_visible(False)
@@ -449,13 +448,13 @@ save_fig_panel(panel_d_ce_ae, 'fig2d_ce_ae',
 # Panel e standalone is exported by fig2e_reliable_quantity.py (-> figures/panels/).
 
 for label, df, val, metric in PANEL_B_DATA:
-    bl, hero = HIGHLIGHTS[label]
+    bl, hero, skip = HIGHLIGHTS[label]
     short = label.replace(': ', '_').replace(' ', '_').lower()
 
     def _make_c(_df=df, _val=val, _label=label, _metric=metric,
-                _bl=bl, _hero=hero):
+                _bl=bl, _hero=hero, _skip=skip):
         return lambda ax: panel_c_slope(ax, _df, _val, _label, _metric,
-                                        _bl, _hero)
+                                        _bl, _hero, _skip)
 
     save_fig_panel(_make_c(), f'fig2c_{short}',
                   figsize=(NM_COL_W * 1.10, NM_COL_W * 0.85))

@@ -294,22 +294,25 @@ print(f"  Saved: {fits_path}")
 
 
 # ══════════════════════════════════════════════════════════════════
-# PILOT VALIDATION (genetic only; leave-future-out)
+# PILOT VALIDATION (leave-future-out)
 # ══════════════════════════════════════════════════════════════════
 
 print(f"\nSimulating pilot experiments (PILOT_NHALF_VALUES = "
       f"{PILOT_NHALF_VALUES[:3]}…{PILOT_NHALF_VALUES[-3:]})...")
 
-fixed_gen = gen_curves[
-    (gen_curves["n_mode"] == "fixed") &
-    (gen_curves["gene_mode"] == "all_genes")
+fixed_all = pd.concat([gen_curves, cel_curves], ignore_index=True)
+fixed_all = fixed_all[
+    (fixed_all["n_mode"] == "fixed") &
+    (fixed_all["gene_mode"] == "all_genes")
 ]
-rho_col_pilot = ("sb_from_median" if "sb_from_median" in fixed_gen.columns
+rho_col_pilot = ("sb_from_median" if "sb_from_median" in fixed_all.columns
                  else "sb_from_mean")
 print(f"  Pilot using reliability column: {rho_col_pilot}")
+for _ct, _g in fixed_all.groupby("context_type"):
+    print(f"    {_ct}: {len(_g.drop_duplicates(['dataset', 'pert_id']))} units")
 
 pilot_rows = []
-for (ds, pert), grp in fixed_gen.groupby(["dataset", "pert_id"]):
+for (ds, pert, ctx), grp in fixed_all.groupby(["dataset", "pert_id", "context_type"]):
     n_total = 2.0 * grp["n_half"].values.astype(float)
     rho_obs = grp[rho_col_pilot].values.astype(float)
 
@@ -334,7 +337,7 @@ for (ds, pert), grp in fixed_gen.groupby(["dataset", "pert_id"]):
             continue
 
         pilot_rows.append({
-            "dataset": ds, "pert": pert,
+            "dataset": ds, "pert": pert, "context_type": ctx,
             "pilot_max_nhalf": pilot_max_nhalf,
             "pilot_N": int(max_N),
             "tau_full": tau_full,
